@@ -1,5 +1,5 @@
-#FoodHunter
-##Икромова Хабибахон Умаржоновна, Б9123-09.03.03пикд
+# FoodHunter
+## Икромова Хабибахон Умаржоновна, Б9123-09.03.03пикд
 
 API — TheMealDB
 https://www.themealdb.com/api.php
@@ -12,7 +12,7 @@ https://www.themealdb.com/api.php
 
 -------------------------------------------------------
 
-##Что сделано в ДЗ №4
+## Что сделано в ДЗ №4
 
 Hilt (DI)
   - @HiltAndroidApp на классе FoodApp
