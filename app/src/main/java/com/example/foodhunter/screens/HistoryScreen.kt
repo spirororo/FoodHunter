@@ -33,17 +33,15 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.foodhunter.model.Dish
 
-// экран истории просмотров - показываем что юзер уже смотрел
 @Composable
 fun HistoryScreen(
-    items: List<Dish>,
-    onDishClick: (Dish) -> Unit,
-    onRemove: (String) -> Unit,
+    history: List<Dish>,
+    onDishSelected: (Dish) -> Unit,
+    onRemoveDish: (String) -> Unit,
     onClearAll: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
-        if (items.isNotEmpty()) {
-            // кнопка очистить всё
+        if (history.isNotEmpty()) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -56,25 +54,24 @@ fun HistoryScreen(
                         contentDescription = null,
                         modifier = Modifier.size(18.dp)
                     )
-                    Text(" Очистить", style = MaterialTheme.typography.labelMedium)
+                    Text(" Очистить историю", style = MaterialTheme.typography.labelMedium)
                 }
             }
         }
 
-        if (items.isEmpty()) {
-            // пусто - покажем заглушку
+        if (history.isEmpty()) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "Тут пока пусто",
+                        text = "История пока пуста",
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "Открывайте блюда из поиска\nи они появятся тут",
+                        text = "Открывайте блюда из поиска,\nи они появятся здесь",
                         style = MaterialTheme.typography.bodySmall,
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.outline,
@@ -88,11 +85,11 @@ fun HistoryScreen(
                     .fillMaxSize()
                     .animateContentSize()
             ) {
-                items(items, key = { it.id }) { dish ->
-                    HistoryRow(
+                items(history, key = { it.id }) { dish ->
+                    HistoryDishRow(
                         dish = dish,
-                        onClick = { onDishClick(dish) },
-                        onRemove = { onRemove(dish.id) }
+                        onClick = { onDishSelected(dish) },
+                        onRemove = { onRemoveDish(dish.id) }
                     )
                 }
             }
@@ -100,9 +97,8 @@ fun HistoryScreen(
     }
 }
 
-// строка истории - горизонтальная, с крестиком для удаления
 @Composable
-private fun HistoryRow(
+private fun HistoryDishRow(
     dish: Dish,
     onClick: () -> Unit,
     onRemove: () -> Unit

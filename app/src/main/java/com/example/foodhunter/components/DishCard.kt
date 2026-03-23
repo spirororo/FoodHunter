@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.foodhunter.model.Dish
 
-// карточка блюда - используется и в поиске и в истории
 @Composable
 fun DishCard(
     dish: Dish,
@@ -35,7 +34,6 @@ fun DishCard(
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
     ) {
-        // картинка сверху, текст снизу - не как у всех сбоку
         AsyncImage(
             model = dish.thumb,
             contentDescription = dish.name,

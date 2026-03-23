@@ -23,13 +23,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.foodhunter.model.Dish
 import com.example.foodhunter.screens.DishScreen
 import com.example.foodhunter.screens.HistoryScreen
 import com.example.foodhunter.screens.HomeScreen
 import com.example.foodhunter.vm.FoodViewModel
 
-// маршруты
 object Routes {
     const val HOME = "home"
     const val HISTORY = "history"
@@ -37,12 +35,11 @@ object Routes {
     fun dishRoute(id: String) = "dish/$id"
 }
 
-// табы для нижней навигации
 private data class Tab(val route: String, val label: String, val icon: @Composable () -> Unit)
 
 private val TABS = listOf(
-    Tab(Routes.HOME, "Поиск") { Icon(Icons.Default.Home, contentDescription = null) },
-    Tab(Routes.HISTORY, "История") { Icon(Icons.AutoMirrored.Filled.List, contentDescription = null) }
+    Tab(Routes.HOME, "Поиск блюд") { Icon(Icons.Default.Home, contentDescription = "Поиск блюд") },
+    Tab(Routes.HISTORY, "История") { Icon(Icons.AutoMirrored.Filled.List, contentDescription = "История") }
 )
 
 @Composable
@@ -52,7 +49,6 @@ fun AppNavGraph() {
     val backStackEntry by nav.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination
 
-    // на экране деталей прячем нижнюю панель
     val showBottomBar = currentRoute?.route in listOf(Routes.HOME, Routes.HISTORY)
 
     Scaffold(
@@ -77,7 +73,6 @@ fun AppNavGraph() {
             }
         }
     ) { innerPadding ->
-        // подписываемся на стейты
         val query by vm.query.collectAsState()
         val searchState by vm.searchState.collectAsState()
         val detailState by vm.detailState.collectAsState()
@@ -94,7 +89,7 @@ fun AppNavGraph() {
                     searchState = searchState,
                     onQueryChange = vm::changeQuery,
                     onSearch = vm::doSearch,
-                    onDishClick = { dish ->
+                    onDishSelected = { dish ->
                         nav.navigate(Routes.dishRoute(dish.id))
                     }
                 )
@@ -102,11 +97,11 @@ fun AppNavGraph() {
 
             composable(Routes.HISTORY) {
                 HistoryScreen(
-                    items = history,
-                    onDishClick = { dish ->
+                    history = history,
+                    onDishSelected = { dish ->
                         nav.navigate(Routes.dishRoute(dish.id))
                     },
-                    onRemove = vm::removeFromHistory,
+                    onRemoveDish = vm::removeFromHistory,
                     onClearAll = vm::wipeHistory
                 )
             }
@@ -120,10 +115,15 @@ fun AppNavGraph() {
                     LaunchedEffect(dishId) {
                         vm.openDishById(dishId)
                     }
+                } else {
+                    LaunchedEffect(Unit) {
+                        vm.showInvalidDishRequest()
+                    }
                 }
                 DishScreen(
                     detailState = detailState,
-                    onBack = { nav.popBackStack() }
+                    onBack = { nav.popBackStack() },
+                    onRetry = vm::retryOpenDish
                 )
             }
         }

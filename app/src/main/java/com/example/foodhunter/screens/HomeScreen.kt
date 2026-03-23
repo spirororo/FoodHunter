@@ -23,23 +23,24 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import com.example.foodhunter.components.DishCard
 import com.example.foodhunter.model.Dish
 import com.example.foodhunter.vm.SearchState
 
-// главный экран - поиск блюд
 @Composable
 fun HomeScreen(
     query: String,
     searchState: SearchState,
     onQueryChange: (String) -> Unit,
     onSearch: () -> Unit,
-    onDishClick: (Dish) -> Unit
+    onDishSelected: (Dish) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
-        // поле ввода с кнопкой поиска
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -50,19 +51,20 @@ fun HomeScreen(
                 value = query,
                 onValueChange = onQueryChange,
                 modifier = Modifier.weight(1f),
-                placeholder = { Text("Что будем искать?") },
-                singleLine = true
+                placeholder = { Text("Введите название блюда") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                keyboardActions = KeyboardActions(onSearch = { onSearch() })
             )
             IconButton(onClick = onSearch) {
                 Icon(
                     Icons.Default.Search,
-                    contentDescription = "Искать",
+                    contentDescription = "Найти блюдо",
                     modifier = Modifier.size(28.dp)
                 )
             }
         }
 
-        // тут показываем разные состояния
         when (searchState) {
             is SearchState.Empty -> {
                 Box(
@@ -70,7 +72,7 @@ fun HomeScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Напиши название блюда\nи нажми на лупу",
+                        text = "Введите название блюда,\nчтобы начать поиск",
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -103,14 +105,13 @@ fun HomeScreen(
                             onClick = onSearch,
                             modifier = Modifier.padding(top = 16.dp)
                         ) {
-                            Text("Попробовать снова")
+                            Text("Повторить поиск")
                         }
                     }
                 }
             }
 
             is SearchState.Found -> {
-                // сетка 2 колонки, норм смотрится
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -119,7 +120,7 @@ fun HomeScreen(
                     items(searchState.dishes) { dish ->
                         DishCard(
                             dish = dish,
-                            onClick = { onDishClick(dish) }
+                            onClick = { onDishSelected(dish) }
                         )
                     }
                 }

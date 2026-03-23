@@ -28,18 +28,17 @@ fun FoodHunterTheme(
     dynamicColors: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    // на андроид 12+ используем динамические цвета, иначе свои
-    val palette = when {
+    val colorScheme = when {
         dynamicColors && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val ctx = LocalContext.current
-            if (useDark) dynamicDarkColorScheme(ctx) else dynamicLightColorScheme(ctx)
+            val context = LocalContext.current
+            if (useDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
         useDark -> DarkPalette
         else -> LightPalette
     }
 
     MaterialTheme(
-        colorScheme = palette,
+        colorScheme = colorScheme,
         typography = AppTypography,
         content = content
     )

@@ -2,7 +2,6 @@ package com.example.foodhunter.theme
 
 import androidx.compose.ui.graphics.Color
 
-// зелёно-оранжевая тема - типа еда, природа, всё такое
 val Emerald80 = Color(0xFFA5D6A7)
 val Sand80 = Color(0xFFFFCC80)
 val Peach80 = Color(0xFFFFAB91)

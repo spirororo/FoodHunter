@@ -1,12 +1,9 @@
 package com.example.foodhunter.net
 
-// ответ от апи всегда приходит в таком формате
 data class MealDbSearchResult(
     val meals: List<RawMeal>?
 )
 
-// у themealdb структура дикая - ингредиенты идут полями strIngredient1..20
-// ну чо поделать, работаем с тем что есть
 data class RawMeal(
     val idMeal: String,
     val strMeal: String,

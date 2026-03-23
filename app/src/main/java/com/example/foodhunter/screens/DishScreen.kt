@@ -25,6 +25,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -41,12 +42,12 @@ import coil.compose.AsyncImage
 import com.example.foodhunter.model.DishDetails
 import com.example.foodhunter.vm.DetailState
 
-// экран деталей блюда - тут вся инфа, ингредиенты и инструкции
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DishScreen(
     detailState: DetailState,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onRetry: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -54,7 +55,9 @@ fun DishScreen(
                 title = {
                     val title = when (detailState) {
                         is DetailState.Ready -> detailState.dish.name
-                        else -> "Загрузка..."
+                        is DetailState.Failure -> "Карточка блюда"
+                        DetailState.Idle -> "Карточка блюда"
+                        DetailState.Loading -> "Загрузка блюда"
                     }
                     Text(title, maxLines = 1)
                 },
@@ -71,6 +74,21 @@ fun DishScreen(
         }
     ) { padding ->
         when (detailState) {
+            DetailState.Idle -> {
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .padding(padding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Выберите блюдо, чтобы открыть карточку",
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
             is DetailState.Loading -> {
                 Box(
                     Modifier
@@ -96,13 +114,16 @@ fun DishScreen(
                             textAlign = TextAlign.Center
                         )
                         Spacer(Modifier.height(12.dp))
-                        Button(onClick = onBack) { Text("Вернуться") }
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Button(onClick = onRetry) { Text("Повторить") }
+                            OutlinedButton(onClick = onBack) { Text("Назад") }
+                        }
                     }
                 }
             }
 
             is DetailState.Ready -> {
-                DishContent(
+                DishDetailsContent(
                     dish = detailState.dish,
                     modifier = Modifier.padding(padding)
                 )
@@ -112,12 +133,11 @@ fun DishScreen(
 }
 
 @Composable
-private fun DishContent(dish: DishDetails, modifier: Modifier = Modifier) {
+private fun DishDetailsContent(dish: DishDetails, modifier: Modifier = Modifier) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // картинка блюда
         item {
             AsyncImage(
                 model = dish.thumb,
@@ -129,7 +149,6 @@ private fun DishContent(dish: DishDetails, modifier: Modifier = Modifier) {
             )
         }
 
-        // инфо-блок: категория и регион
         item {
             Row(
                 modifier = Modifier
@@ -137,12 +156,11 @@ private fun DishContent(dish: DishDetails, modifier: Modifier = Modifier) {
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                InfoChip(label = "Категория", value = dish.category)
-                InfoChip(label = "Кухня", value = dish.area)
+                DishMetaChip(label = "Категория", value = dish.category)
+                DishMetaChip(label = "Регион", value = dish.area)
             }
         }
 
-        // ингредиенты
         if (dish.ingredients.isNotEmpty()) {
             item {
                 Text(
@@ -175,7 +193,6 @@ private fun DishContent(dish: DishDetails, modifier: Modifier = Modifier) {
             }
         }
 
-        // инструкция по приготовлению
         if (dish.instructions.isNotBlank()) {
             item {
                 HorizontalDivider(
@@ -183,7 +200,7 @@ private fun DishContent(dish: DishDetails, modifier: Modifier = Modifier) {
                     color = MaterialTheme.colorScheme.outlineVariant
                 )
                 Text(
-                    "Как готовить",
+                    "Способ приготовления",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(horizontal = 16.dp)
@@ -201,9 +218,8 @@ private fun DishContent(dish: DishDetails, modifier: Modifier = Modifier) {
     }
 }
 
-// маленький чип с лейблом и значением
 @Composable
-private fun InfoChip(label: String, value: String) {
+private fun DishMetaChip(label: String, value: String) {
     Card(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(

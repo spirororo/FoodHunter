@@ -2,6 +2,7 @@ package com.example.foodhunter.inject
 
 import android.content.Context
 import androidx.room.Room
+import com.example.foodhunter.BuildConfig
 import com.example.foodhunter.db.AppDatabase
 import com.example.foodhunter.db.HistoryDao
 import com.example.foodhunter.net.MealDbService
@@ -16,46 +17,45 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
-// один модуль на все зависимости - и сеть и база тут
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
-    private const val MEALDB_URL = "https://www.themealdb.com/api/json/v1/1/"
+    private const val BASE_URL = "https://www.themealdb.com/api/json/v1/1/"
 
-    // собираем okhttp с логами для дебага
     @Provides
     @Singleton
-    fun httpClient(): OkHttpClient {
-        val logger = HttpLoggingInterceptor().apply {
+    fun provideHttpClient(): OkHttpClient {
+        val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BASIC
         }
-        return OkHttpClient.Builder()
-            .addInterceptor(logger)
-            .build()
+        return OkHttpClient.Builder().apply {
+            if (BuildConfig.DEBUG) {
+                addInterceptor(loggingInterceptor)
+            }
+        }.build()
     }
 
     @Provides
     @Singleton
-    fun retrofit(client: OkHttpClient): Retrofit =
+    fun provideRetrofit(client: OkHttpClient): Retrofit =
         Retrofit.Builder()
-            .baseUrl(MEALDB_URL)
+            .baseUrl(BASE_URL)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
     @Provides
     @Singleton
-    fun mealApi(retrofit: Retrofit): MealDbService =
+    fun provideMealApi(retrofit: Retrofit): MealDbService =
         retrofit.create(MealDbService::class.java)
 
-    // база данных для истории просмотров
     @Provides
     @Singleton
-    fun database(@ApplicationContext ctx: Context): AppDatabase =
-        Room.databaseBuilder(ctx, AppDatabase::class.java, "foodhunter.db")
+    fun provideDatabase(@ApplicationContext context: Context): AppDatabase =
+        Room.databaseBuilder(context, AppDatabase::class.java, "foodhunter.db")
             .build()
 
     @Provides
-    fun historyDao(db: AppDatabase): HistoryDao = db.historyDao()
+    fun provideHistoryDao(database: AppDatabase): HistoryDao = database.historyDao()
 }

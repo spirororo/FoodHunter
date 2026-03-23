@@ -14,20 +14,17 @@ import javax.inject.Singleton
 class DishRepo @Inject constructor(
     private val api: MealDbService
 ) {
-    // ищем блюда по названию, если ничего нет - пустой список
     suspend fun search(query: String): List<Dish> = withContext(Dispatchers.IO) {
         val response = api.findByName(query)
-        response.meals?.map { raw -> raw.toDish() } ?: emptyList()
+        response.meals?.map(RawMeal::toDish).orEmpty()
     }
 
-    // тянем полные данные по конкретному блюду
     suspend fun loadDetails(id: String): DishDetails? = withContext(Dispatchers.IO) {
         val response = api.getById(id)
         response.meals?.firstOrNull()?.toDetails()
     }
 }
 
-// конвертим сырой ответ в нормальную модель
 private fun RawMeal.toDish() = Dish(
     id = idMeal,
     name = strMeal,
@@ -35,9 +32,8 @@ private fun RawMeal.toDish() = Dish(
     category = strCategory
 )
 
-// вот тут самое весёлое - надо собрать ингредиенты из 20 полей
 private fun RawMeal.toDetails(): DishDetails {
-    val pairs = listOf(
+    val ingredients = listOf(
         strIngredient1 to strMeasure1,
         strIngredient2 to strMeasure2,
         strIngredient3 to strMeasure3,
@@ -59,9 +55,6 @@ private fun RawMeal.toDetails(): DishDetails {
         strIngredient19 to strMeasure19,
         strIngredient20 to strMeasure20
     )
-
-    // фильтруем пустые, оставляем только реальные ингредиенты
-    val ingredients = pairs
         .filter { (name, _) -> !name.isNullOrBlank() }
         .map { (name, measure) ->
             IngredientLine(

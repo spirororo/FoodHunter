@@ -1,6 +1,5 @@
 package com.example.foodhunter.model
 
-// короткая модель для списка - только самое нужное
 data class Dish(
     val id: String,
     val name: String,
@@ -8,7 +7,6 @@ data class Dish(
     val category: String?
 )
 
-// полная инфа о блюде когда открываем детали
 data class DishDetails(
     val id: String,
     val name: String,
@@ -20,7 +18,6 @@ data class DishDetails(
     val ingredients: List<IngredientLine>
 )
 
-// одна строчка ингредиента - что и сколько
 data class IngredientLine(
     val what: String,
     val howMuch: String
